@@ -6,7 +6,7 @@ require('./node_modules/fancybox/dist/css/jquery.fancybox.css');
 // Run popup with manual config
 function run(config) {
   $(document).ready(() => {
-    const { title } = config;
+    const { title, imageUrl } = config;
 
     //// Simply launch fancybox
     //setTimeout(function() {
@@ -15,8 +15,8 @@ function run(config) {
 
     // Make fancybox config...
     const fancyConf = {
-      href: 'http://trizero.eu/public/immagini/slides/trizero-bkg-slider.jpg',
       title,
+      href: imageUrl,
     };
 
     $.fancybox(fancyConf);
