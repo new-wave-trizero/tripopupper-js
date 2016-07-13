@@ -25,7 +25,7 @@ function run(config) {
 
 // Launch popup with remote config
 function launch(name) {
-  run({ title: name });
+  run({ title: name, imageUrl: 'http://trizero.eu/public/immagini/slides/trizero-bkg-slider.jpg' });
 }
 
 //const x = () => alert('ES6 IS COOL!!! Giova');
