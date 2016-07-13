@@ -6,7 +6,7 @@ require('./node_modules/fancybox/dist/css/jquery.fancybox.css');
 // Run popup with manual config
 function run(config) {
   $(document).ready(() => {
-    const { title, imageUrl } = config;
+    const { title, imageUrl, overlay } = config;
 
     //// Simply launch fancybox
     //setTimeout(function() {
@@ -14,10 +14,17 @@ function run(config) {
     //}, extraConfig.timeout);
 
     // Make fancybox config...
+
     const fancyConf = {
       title,
       href: imageUrl,
+      helpers: {},
     };
+
+    // Just remove the overlay
+    if (!overlay) {
+      fancyConf.helpers.overlay = null;
+    }
 
     $.fancybox(fancyConf);
   });
