@@ -31,6 +31,7 @@ const makeLogger = log => log ? console : {
   log: () => {},
   info: () => {},
   error: () => {},
+  debug: () => {},
 };
 
 // Run popup with manual config
@@ -41,7 +42,23 @@ const run = logger => config => {
       imageUrl,
       padding,
       overlay,
+      delay,
+      start,
+      end,
     } = config;
+
+    // Check dates...
+    const now = new Date().getTime();
+
+    if (start && now < new Date(`${start} 00:00:00`).getTime()) {
+      logger.debug('To early to show popup');
+      return;
+    }
+
+    if (end && now > new Date(`${end} 23:59:59`).getTime()) {
+      logger.debug('To late to show popup');
+      return;
+    }
 
     // Make fancybox config...
     const fancyConf = {
@@ -60,8 +77,7 @@ const run = logger => config => {
       fancyConf.helpers.overlay = null;
     }
 
-    const delay = 0;
-    setTimeout(() => $.fancybox(fancyConf), delay);
+    setTimeout(() => $.fancybox(fancyConf), (delay || 0) * 1000);
   });
 };
 
