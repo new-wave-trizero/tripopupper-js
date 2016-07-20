@@ -3,80 +3,106 @@ const $ = require('jquery');
 require('fancybox')($);
 require('./node_modules/fancybox/dist/css/jquery.fancybox.css');
 
-// Run popup with manual config
-function run(config) {
-  $(document).ready(() => {
-    const { title, imageUrl, overlay } = config;
+// Urls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'http://popup.trizero.eu/api'
+  : 'http://tripopupper.app/api';
+const APP_URL = process.env.NODE_ENV === 'production'
+  ? 'http://popup.trizero.eu'
+  : 'http://tripopupper.app';
 
-    //// Simply launch fancybox
-    //setTimeout(function() {
-      //$.fancybox(fancyConfig);
-    //}, extraConfig.timeout);
+// Launch popup with remote config
+function launch(name, debug = false) {
+
+  const logger = makeLogger(debug);
+
+  logTripopupHello(logger);
+  logger.info(`Launching popup '${name}'`);
+
+  const err = handleApiError(name);
+  fetchPopupConfig(name, run(logger), err(logger));
+}
+
+// noop
+const noop = () => {};
+
+// Simply console wrapper or object with empty console methods...
+const makeLogger = log => log ? console : {
+  log: () => {},
+  info: () => {},
+  error: () => {},
+};
+
+// Run popup with manual config
+const run = logger => config => {
+  $(document).ready(() => {
+    const {
+      title,
+      imageUrl,
+      padding,
+      overlay,
+    } = config;
 
     // Make fancybox config...
-
     const fancyConf = {
+      padding: undefined,
       title,
       href: imageUrl,
       helpers: {},
     };
+
+    if (padding !== null && typeof padding !== 'undefined') {
+      fancyConf.padding = padding;
+    }
 
     // Just remove the overlay
     if (!overlay) {
       fancyConf.helpers.overlay = null;
     }
 
-    $.fancybox(fancyConf);
+    const delay = 0;
+    setTimeout(() => $.fancybox(fancyConf), delay);
   });
-}
+};
 
-// Launch popup with remote config
-function launch(name) {
-  run({ title: name, imageUrl: 'http://trizero.eu/public/immagini/slides/trizero-bkg-slider.jpg' });
-}
+// Log specific tip of tripopupper errors...
+const handleApiError = name => logger => error => {
+  if (typeof error.responseJSON === 'object' && typeof error.responseJSON.message === 'string') {
+    logger.error(error.responseJSON.message); // Good API has good error messages
+  }
+};
 
-//const x = () => alert('ES6 IS COOL!!! Giova');
+// Fetch config from Tripopup API
+const fetchPopupConfig = (name, success = noop, fail = noop, always = noop) => (
+  $.getJSON(`${API_URL}/popup/${name}`)
+    .done(success)
+    .fail(fail)
+    .always(always)
+);
 
-//x();
-//var popupper = function(popupID) {
+// Show Tripopup hello to the entire world wide web
+const logTripopupHello = logger => {
+  logger.log(`
+   /$$$$$$$$        /$$
+  |__  $$__/       |__/
+     | $$  /$$$$$$  /$$  /$$$$$$   /$$$$$$   /$$$$$$  /$$   /$$  /$$$$$$
+     | $$ /$$__  $$| $$ /$$__  $$ /$$__  $$ /$$__  $$| $$  | $$ /$$__  $$
+     | $$| $$  \__/| $$| $$  \ $$| $$  \ $$| $$  \ $$| $$  | $$| $$  \ $$
+     | $$| $$      | $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$
+     | $$| $$      | $$| $$$$$$$/|  $$$$$$/| $$$$$$$/|  $$$$$$/| $$$$$$$/
+     |__/|__/      |__/| $$____/  \______/ | $$____/  \______/ | $$____/
+                       | $$                | $$                | $$
+                       | $$                | $$                | $$
+                       |__/                |__/                |__/
+  `);
+  logger.log('Powered by Trizero http://trizero.eu');
+};
 
-  //function showPopup(remoteConfig) {
-    //var fancyConfig = remoteConfig.fancy;
-    //var extraConfig = $.extend({}, {
-      //timeout: 0,
-      //period: {
-        //start: null,
-        //end: null
-      //}
-    //}, remoteConfig.extra || {});
-
-  //}
-
-  //function processRemoteConfig(remoteConfig) {
-    //// Wait until DOM is loaded...
-      //// Check for valid remote config...
-      //if (typeof remoteConfig !== 'object') {
-        //console.error('Tripopupper remote config is invalid');
-        //return;
-      //}
-      //// Show popup!
-      //showPopup(remoteConfig);
-    //});
-  //}
-
-  //// Retrieve remote config
-  //$.getJSON('https://tripopupper.firebaseio.com/' + popupID + '.json')
-    //.done(processRemoteConfig)
-    //.fail(function(error) {
-      //console.error('Tripopupper failed to retrieve remote config', error);
-    //});
-//};
-
-
-// Expose libs method
+// Expose lib methods
 const popupper = {
   launch,
-  run,
+  // TODO: Make a specific build with or without the run method
+  run: run(makeLogger(true)),
 };
 
 module.exports = popupper;

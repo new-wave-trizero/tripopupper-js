@@ -1,13 +1,21 @@
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = {
-  entry: './index.js',
+  devtool: 'cheap-module-eval-source-map',
+  entry: [
+    './index.js',
+  ],
 	output: {
 		path: path.join(__dirname, 'lib'),
 		filename: 'tripopupper.js',
 		library: 'tripopupper',
-		libraryTarget: 'umd'
+		libraryTarget: 'umd',
+    publicPath: '/lib/'
   },
+  plugins: [
+    new webpack.NoErrorsPlugin(),
+  ],
   module: {
     loaders: [
       {
