@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 module.exports = {
   devtool: 'source-map',
-  entry: './index.js',
+  entry: './src/index.js',
 	output: {
 		path: path.join(__dirname, 'lib'),
 		filename: 'tripopupper.js',

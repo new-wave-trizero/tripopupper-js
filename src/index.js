@@ -1,7 +1,6 @@
-// Set up FancyBox
 const $ = require('jquery');
-require('fancybox')($);
-require('./node_modules/fancybox/dist/css/jquery.fancybox.css');
+import fancyboxLauncher from './launchers/fancyboxLauncher';
+import qandoFancyboxLauncher from './launchers/qandoFancyboxLauncher';
 
 // Urls
 const API_URL = process.env.NODE_ENV === 'production'
@@ -32,53 +31,55 @@ const makeLogger = log => log ? console : {
   info: () => {},
   error: () => {},
   debug: () => {},
+  warn: () => {},
+};
+
+// Check if popup should run based on config
+const shouldRun = logger => config => {
+  const now = new Date().getTime();
+  const { start, end } = config;
+
+  if (start && now < new Date(`${start} 00:00:00`).getTime()) {
+    logger.debug('To early to show popup');
+    return false;
+  }
+
+  if (end && now > new Date(`${end} 23:59:59`).getTime()) {
+    logger.debug('To late to show popup');
+    return false;
+  }
+
+  return true;
+};
+
+// Make a launcher
+const makeLauncher = logger => launchersFactory => config => {
+  for (const launcherFactory of launchersFactory) {
+    if (launcherFactory.match(config)) {
+      return launcherFactory.makeLauncher(logger)(config);
+    }
+  }
 };
 
 // Run popup with manual config
 const run = logger => config => {
-  $(document).ready(() => {
-    const {
-      title,
-      imageUrl,
-      padding,
-      overlay,
-      delay,
-      start,
-      end,
-    } = config;
+  // Check if popup should run...
+  if (!shouldRun(logger)(config)) {
+    return;
+  }
 
-    // Check dates...
-    const now = new Date().getTime();
+  const launcher = makeLauncher(logger)([
+    qandoFancyboxLauncher,
+    fancyboxLauncher,
+  ])(config);
 
-    if (start && now < new Date(`${start} 00:00:00`).getTime()) {
-      logger.debug('To early to show popup');
-      return;
-    }
+  if (typeof launcher === 'undefined') {
+    logger.error('Cannto find a suitable launcher for this configuration', config);
+    return;
+  }
 
-    if (end && now > new Date(`${end} 23:59:59`).getTime()) {
-      logger.debug('To late to show popup');
-      return;
-    }
-
-    // Make fancybox config...
-    const fancyConf = {
-      padding: undefined,
-      title,
-      href: imageUrl,
-      helpers: {},
-    };
-
-    if (padding !== null && typeof padding !== 'undefined') {
-      fancyConf.padding = padding;
-    }
-
-    // Just remove the overlay
-    if (!overlay) {
-      fancyConf.helpers.overlay = null;
-    }
-
-    setTimeout(() => $.fancybox(fancyConf), (delay || 0) * 1000);
-  });
+  // Invoke launcher after config delay
+  setTimeout(() => launcher(), (config.delay || 0) * 1000);
 };
 
 // Log specific tip of tripopupper errors...
