@@ -122,10 +122,10 @@ const popupper = {
   launch,
   // TODO: Make a specific build with or without the run method
   // Tiplically used in Tripoup dashboard to locally test popup behaviour
-  run: (debug = true) => {
+  run: (config, debug = true) => {
     const logger = makeLogger(debug);
     logTripopupHello(logger);
-    run(logger);
+    run(logger)(config);
   },
 };
 
