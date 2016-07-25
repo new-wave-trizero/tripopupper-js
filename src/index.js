@@ -16,7 +16,7 @@ function launch(name, debug = false) {
   const logger = makeLogger(debug);
 
   logTripopupHello(logger);
-  logger.info(`Launching popup '${name}'`);
+  logger.info('Launching popup', name);
 
   const err = handleApiError(name);
   fetchPopupConfig(name, run(logger), err(logger));
@@ -63,6 +63,8 @@ const makeLauncher = logger => launchersFactory => config => {
 
 // Run popup with manual config
 const run = logger => config => {
+  logger.info('Running configuration', config);
+
   // Check if popup should run...
   if (!shouldRun(logger)(config)) {
     return;
@@ -119,7 +121,12 @@ const logTripopupHello = logger => {
 const popupper = {
   launch,
   // TODO: Make a specific build with or without the run method
-  run: run(makeLogger(true)),
+  // Tiplically used in Tripoup dashboard to locally test popup behaviour
+  run: (debug = true) => {
+    const logger = makeLogger(debug);
+    logTripopupHello(logger);
+    run(logger);
+  },
 };
 
 module.exports = popupper;
