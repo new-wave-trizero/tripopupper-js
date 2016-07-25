@@ -1,10 +1,12 @@
 const $ = require('jquery');
 
 // Match the launcher?
-const match = config => !!config.experimental.qandoShop;
+const match = (logger, config) =>
+  typeof config.experimental === 'object' &&
+  typeof config.experimental.qandoShop === 'string';
 
 // Make launcher
-const makeLauncher = logger => config => {
+const makeLauncher = (logger, config) => {
   // Require fancybox dependencies...
   require('fancybox')($);
   require('fancybox/dist/css/jquery.fancybox.css');

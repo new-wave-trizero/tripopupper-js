@@ -1,10 +1,10 @@
 const $ = require('jquery');
 
 // Match the launcher?
-const match = config => true;
+const match = (logger, config) => true;
 
 // Make launcher
-const makeLauncher = logger => config => {
+const makeLauncher = (logger, config) => {
   // Require fancybox dependencies...
   require('fancybox')($);
   require('fancybox/dist/css/jquery.fancybox.css');
