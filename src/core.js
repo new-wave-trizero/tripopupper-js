@@ -14,8 +14,8 @@ export const run = launchersMakers => key => logger => config => {
     lastRunTime: new Date().getTime()
   });
 
-  // Check if popup should run...
-  if (!shouldRun(logger, config, (key && getLocalPopupData(key)))) {
+  // Check if popup should be launched...
+  if (!shouldBeLaunched(logger, config, (key && getLocalPopupData(key)))) {
     return;
   }
 
@@ -38,18 +38,18 @@ export const run = launchersMakers => key => logger => config => {
   }, (config.delay || 0) * 1000);
 };
 
-// Check if popup should run based on config
-const shouldRun = (logger, config, localPopupData) => {
+// Check if popup should be launched based on config
+const shouldBeLaunched = (logger, config, localPopupData) => {
   const now = new Date().getTime();
   const { start, end } = config;
 
   if (start && now < new Date(`${start} 00:00:00`).getTime()) {
-    logger.debug('To early to show popup');
+    logger.debug('To early to launch popup');
     return false;
   }
 
   if (end && now > new Date(`${end} 23:59:59`).getTime()) {
-    logger.debug('To late to show popup');
+    logger.debug('To late to launch popup');
     return false;
   }
 
@@ -57,11 +57,11 @@ const shouldRun = (logger, config, localPopupData) => {
     const { showAt } = config;
 
     if (showAt === 'once-per-day') {
-      const shouldRunning = parseInt((now - (+localPopupData.lastLaunchTime || null)) / 1000) >= (3600 * 24);
-      if (!shouldRunning) {
-        logger.debug('Popup alredy showed this day :P');
+      const launch = parseInt((now - (+localPopupData.lastLaunchTime || null)) / 1000) >= (3600 * 24);
+      if (!launch) {
+        logger.debug('Popup alredy launched this day :P');
       }
-      return shouldRunning;
+      return launch;
     }
   }
 
