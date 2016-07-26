@@ -3,7 +3,7 @@ const $ = require('jquery');
 // Match the launcher?
 const match = (logger, config) =>
   typeof config.experimental === 'object' &&
-  typeof config.experimental.qandoShop === 'string';
+  !!config.experimental.qandoShop;
 
 // Make launcher
 const makeLauncher = (logger, config) => {
