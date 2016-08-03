@@ -1,5 +1,5 @@
 // Run popup with given config and launchers makers
-export const run = launchersMakers => key => logger => config => {
+export const run = launchersMakers => key => logger => next => config => {
   logger.info('Running configuration', config);
 
   if (!key) {
@@ -16,6 +16,7 @@ export const run = launchersMakers => key => logger => config => {
 
   // Check if popup should be launched...
   if (!shouldBeLaunched(logger, config, (key && getLocalPopupData(key)))) {
+    next();
     return;
   }
 
@@ -23,13 +24,14 @@ export const run = launchersMakers => key => logger => config => {
 
   if (typeof launcher === 'undefined') {
     logger.error('Cannot find a suitable launcher for this configuration', config);
+    next();
     return;
   }
 
   // Invoke launcher after config delay
   setTimeout(() => {
     // Go, Go, launcher!
-    launcher();
+    launcher(next);
 
     // Update last launch time...
     key && updateLocalPopupData(key, {

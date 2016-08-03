@@ -34,7 +34,7 @@ const makeLauncher = (logger, config) => {
   }
 
   // Fancybox launcher fn
-  return () => $.fancybox(fancyConf);
+  return (next) => $.fancybox({ ...fancyConf, afterClose: next });
 };
 
 export default {
